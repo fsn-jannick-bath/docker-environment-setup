@@ -77,6 +77,19 @@ services:
     restart: always
     ports:
       - 8080
+    labels:
+      - "traefik.enable=true"
+
+      # - "traefik.http.middlewares.adminer-https.redirectscheme.scheme=https"
+
+      - 'traefik.http.routers.adminerhttp.entrypoints=web'
+      - 'traefik.http.routers.adminerhttp.rule=Host(`adminer.loc`)'
+      # - "traefik.http.routers.adminerhttp.middlewares=adminer-https"
+
+      - "traefik.http.routers.adminer.rule=Host(`adminer.loc`)"
+      - "traefik.http.routers.adminer.entrypoints=websecure"
+      - "traefik.http.routers.adminer.tls=true"
+      - "traefik.http.services.adminer.loadbalancer.server.port=8080"
     networks:
       - db_network
       - traefik_net
