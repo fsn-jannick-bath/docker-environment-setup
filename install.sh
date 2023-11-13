@@ -108,6 +108,23 @@ fi
 
 docker-compose up -d
 
+# Add domains to /etc/hosts
+if ! grep "traefik.loc" /etc/hosts > /dev/null; then
+    sed -i '1s/^/127.0.0.1     traefik.loc\n/' /etc/hosts
+fi
+
+if ! grep "portainer.loc" /etc/hosts > /dev/null; then
+    sed -i '1s/^/127.0.0.1     portainer.loc\n/' /etc/hosts
+fi
+
+if ! grep "adminer.loc" /etc/hosts > /dev/null; then
+    sed -i '1s/^/127.0.0.1     adminer.loc\n/' /etc/hosts
+fi
+
+if ! grep "whoami.loc" /etc/hosts > /dev/null; then
+    sed -i '1s/^/127.0.0.1     whoami.loc\n/' /etc/hosts
+fi
+
 # Healthchecks
 
 # Traefik
