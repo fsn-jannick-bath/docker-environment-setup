@@ -40,14 +40,14 @@ else
     echo "No apache webserver running. Skipping..."
 fi
 
-if [ ! -d "/home/$USER/db_data" ]; then
-    if mkdir /home/$USER/db_data ; then
-        echo "Created directory /home/$USER/db_data"
+if [ ! -d "/home/$SUDO_USER/db_data" ]; then
+    if mkdir /home/$SUDO_USER/db_data ; then
+        echo "Created directory /home/$SUDO_USER/db_data"
     else
-        echo "Failed to create /home/$USER/db_data. Skipping..."
+        echo "Failed to create /home/$SUDO_USER/db_data. Skipping..."
     fi
 else
-    echo "Directory /home/$USER/db_data already exists. Skipping..."
+    echo "Directory /home/$SUDO_USER/db_data already exists. Skipping..."
 fi
 
 if docker network ls | grep traefik_net > /dev/null 2>&1; then
