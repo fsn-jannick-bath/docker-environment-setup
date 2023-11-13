@@ -1,0 +1,112 @@
+version: "3"
+services:
+  traefik:
+    image: "traefik:v2.9"
+    container_name: "traefik"
+    restart: "always"
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=traefik_net"
+      - "--providers.file.filename=/root/.config/ssl.toml"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.address=:80"
+      - "--log.level=DEBUG"
+    ports:
+      - "443:443"
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "./certs:/certs"
+      - ./traefik-ssl.toml:/root/.config/ssl.toml
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    labels:
+      # Comment out for automatic https redirection
+      - "traefik.enable=true"
+
+      # - "traefik.http.middlewares.traefik-https.redirectscheme.scheme=https"
+
+      - 'traefik.http.routers.traefikhttp.entrypoints=web'
+      - 'traefik.http.routers.traefikhttp.rule=Host(`traefik.loc`)'
+      # - "traefik.http.routers.traefikhttp.middlewares=traefik-https"
+      
+      - "traefik.http.routers.traefik.rule=Host(`traefik.loc`)"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+      
+    networks:
+      - traefik_net
+
+  whoami:
+    image: "traefik/whoami"
+    container_name: "simple-service"
+    labels:
+      - "traefik.enable=true"
+
+      # - "traefik.http.middlewares.whoami-https.redirectscheme.scheme=https"
+
+      - 'traefik.http.routers.whoamihttp.entrypoints=web'
+      - 'traefik.http.routers.whoamihttp.rule=Host(`whoami.loc`)'
+      # - "traefik.http.routers.whoamihttp.middlewares=whoami-https"
+
+      - "traefik.http.routers.whoami.rule=Host(`whoami.loc`)"
+      - "traefik.http.routers.whoami.entrypoints=websecure"
+      - "traefik.http.routers.whoami.tls=true"
+      - "traefik.http.services.whoami.loadbalancer.server.port=80"
+
+    networks:
+      - traefik_net
+  
+  mysql:
+    image: 'mysql:8'
+    container_name: "mysql"
+    command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci','--default-authentication-plugin=mysql_native_password']
+    environment:
+        - MYSQL_ROOT_PASSWORD=opwer384
+    volumes:
+        - ~/db_data:/var/lib/mysql
+    network_mode: db_network
+    hostname: mysql
+    restart: always
+        
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080
+    networks:
+      - db_network
+      - traefik_net
+
+  portainer:
+    image: 'portainer/portainer-ce:2.17.1'
+    restart: always
+    ports:
+        - '8000:8000'
+        - '9000:9000'
+    volumes:
+        - '/var/run/docker.sock:/var/run/docker.sock'
+        - '/var/lib/docker/volumes/portainer_data/_data:/data'
+        - '~/.ssh:/root/.ssh'
+    labels:
+        - 'traefik.enable=true'
+        - 'traefik.http.routers.portainer.entrypoints=web'
+        - 'traefik.http.routers.portainer.rule=Host(`portainer.loc`)'
+
+        - 'traefik.http.routers.portainerhttps.entrypoints=websecure'
+        - 'traefik.http.routers.portainerhttps.rule=Host(`portainer.loc`)'
+        - "traefik.http.routers.portainerhttps.tls.certresolver=myresolver"
+        - "traefik.http.services.portainerhttps.loadbalancer.server.port=9000"
+        - "traefik.http.routers.portainerhttps.middlewares=global-websocket"
+    networks:
+      - traefik_net
+
+networks:
+  traefik_net:
+    external: true
+
+  db_network:
+    external: true
+

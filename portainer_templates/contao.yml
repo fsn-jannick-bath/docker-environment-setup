@@ -1,0 +1,35 @@
+version: '3'
+services:
+  contao:
+    container_name: ${DOCKER_NAME}
+    image: registry.gitlab.lupcom.de/contao-docker/contao-ubuntu-container:php8.1
+    restart: unless-stopped
+    environment:
+      - CONTAO_VERSION=4.13
+      - NGINX_HOST=${DOCKER_NAME}.loc
+    volumes:
+      - /home/jannick/workspace/work/contao/${DOCKER_NAME}:/var/www/contao:rw
+    labels:
+      - "traefik.enable=true"
+
+      # - "traefik.http.middlewares.${DOCKER_NAME}-https.redirectscheme.scheme=https"
+
+      - 'traefik.http.routers.${DOCKER_NAME}.entrypoints=web'
+      - 'traefik.http.routers.${DOCKER_NAME}.rule=Host(`${DOCKER_NAME}.loc`)'
+      # - "traefik.http.routers.${DOCKER_NAME}.middlewares=${DOCKER_NAME}-https"
+
+      - "traefik.http.routers.${DOCKER_NAME}https.rule=Host(`${DOCKER_NAME}.loc`)"
+      - "traefik.http.routers.${DOCKER_NAME}https.entrypoints=websecure"
+      - "traefik.http.routers.${DOCKER_NAME}https.tls=true"
+      - "traefik.http.services.${DOCKER_NAME}https.loadbalancer.server.port=8080"
+    ports:
+      - 8080
+    networks:
+      - db_network
+      - traefik_net
+
+networks:
+  traefik_net:
+    external: true
+  db_network:
+    external: true
