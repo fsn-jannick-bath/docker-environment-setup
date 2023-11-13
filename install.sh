@@ -80,6 +80,32 @@ else
     fi
 fi
 
+# Check ports
+if sudo lsof -i -P -n | grep LISTEN | grep 8080 > /dev/null 2>&1; then
+    echo "Error port 8080 is being used. Quitting."
+    exit
+fi
+
+if sudo lsof -i -P -n | grep LISTEN | grep 443 > /dev/null 2>&1; then
+    echo "Error port 443 is being used. Quitting."
+    exit
+fi
+
+if sudo lsof -i -P -n | grep LISTEN | grep 80 > /dev/null 2>&1; then
+    echo "Error port 80 is being used. Quitting."
+    exit
+fi
+
+if sudo lsof -i -P -n | grep LISTEN | grep 8000 > /dev/null 2>&1; then
+    echo "Error port 8000 is being used. Quitting."
+    exit
+fi
+
+if sudo lsof -i -P -n | grep LISTEN | grep 8000 > /dev/null 2>&1; then
+    echo "Error port 9000 is being used. Quitting."
+    exit
+fi
+
 docker-compose up -d
 
 # Healthchecks
