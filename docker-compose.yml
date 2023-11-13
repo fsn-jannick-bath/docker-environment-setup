@@ -41,7 +41,7 @@ services:
 
   whoami:
     image: "traefik/whoami"
-    container_name: "simple-service"
+    container_name: "whoami"
     labels:
       - "traefik.enable=true"
 
@@ -73,6 +73,7 @@ services:
         
   adminer:
     image: adminer
+    container_name: adminer
     restart: always
     ports:
       - 8080
@@ -82,6 +83,7 @@ services:
 
   portainer:
     image: 'portainer/portainer-ce:2.17.1'
+    container_name: portainer
     restart: always
     ports:
         - '8000:8000'
