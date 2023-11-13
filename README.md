@@ -5,7 +5,7 @@
 ```bash
 git clone https://gitlab.lupcom.de/jbath/docker-environment-setup.git .
 chmod u+x install.sh
-./install.sh
+sudo ./install.sh
 ```
 
 ## Adding a new domain
