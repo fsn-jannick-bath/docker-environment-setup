@@ -33,3 +33,113 @@ Restart environment.
 ```bash
 docker-compose down && docker-compose up -d
 ```
+
+## Traefik & Docker compose
+
+Example `docker-compose.yml` for http traffic.
+
+```yaml
+version: "3"
+services:
+  traefik:
+    image: "traefik:v2.9"
+    container_name: "traefik"
+    restart: "always"
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=traefik_net"
+      #- "--providers.file.filename=/root/.config/ssl.toml"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.address=:80"
+      - "--log.level=DEBUG"
+    ports:
+      - "443:443"
+      - "80:80"
+      - "9090:8080"
+    volumes:
+      #- "./certs:/certs"
+      #- ./traefik-ssl.toml:/root/.config/ssl.toml
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    labels:
+      - traefik.enable=true
+      #- traefik.http.middlewares.whoami-https.redirectscheme.scheme=https
+      - traefik.http.routers.traefik-http.entrypoints=web
+      - traefik.http.routers.traefik-http.rule=Host(`traefik.ipv6.aeef.tech`)
+      #- traefik.http.routers.whoami-http.middlewares=whoami-https@docker
+      #- traefik.http.routers.whoami.entrypoints=web-secure
+      #- traefik.http.routers.whoami.rule=Host(`whoami.example.com`)
+      #- traefik.http.routers.whoami.tls=true
+      #- traefik.http.routers.whoami.tls.certresolver=certificatesResolverDefault
+      - traefik.docker.network=traefik_net
+      - traefik.http.services.traefik-http.loadbalancer.server.port=8080
+      
+    networks:
+      - traefik_net
+      
+networks:
+  traefik_net:
+    external: true
+```
+
+### Ports
+
+```yaml
+ports:
+  # - [PortOnHost]:[PortInTheContainer]
+    - "80:80"
+    - "9090:8080"
+  # - [PortInTheContainer] -> Port for the host is automatically assigned to a random port like 55678
+    - 8080
+```
+
+### Traefik Labels
+
+Loadbalancer:
+
+```yaml
+labels:
+  # - traefik.http.services.[httpServiceName].loadbalancer.server.port=[portInTheContainer]
+    - traefik.http.services.traefik-http.loadbalancer.server.port=8080
+```
+
+Host:
+
+```yaml
+labels:
+  # - traefik.http.routers.[httpServiceName].rule=Host(`[ipOrDomain*]`)
+    - traefik.http.routers.traefik-http.rule=Host(`traefik.ipv6.aeef.tech`)
+```
+
+\* = An ip (or domain) that points to traefik. For example `*.example.com` points to 212.172.142.22. Traefik can only direct traffic if all the sub-domains that should be resolved point to it's service, in this case the traefik service listens on 212.172.142.22 on port :80 and :443.
+
+You could also make traefik listen on, lets say, port :8080. Then you would have to pass that port every time you try to access a sub-domain directed by traefik. In this case `sub.example.com:8080`.
+
+The host entry is **mandatory** in order to use traefik's service.
+
+### Docker Networks
+
+"Import" a network into a stack.
+
+```yaml
+# networks:
+#   [nameOfNetwork]:
+#     external: true
+
+networks:
+  traefik_net:
+    external: true
+```
+
+```yaml
+# services:
+#   [nameOfService]:
+#      networks:
+#         - [nameOfNetwork]
+
+services:
+  traefik:
+    networks:
+      - traefik_net
+```
