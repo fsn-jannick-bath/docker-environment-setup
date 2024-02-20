@@ -143,3 +143,33 @@ services:
     networks:
       - traefik_net
 ```
+
+### Local networks
+
+Traefik as an external network to allow routing. Define redis and mariadb as local networks. If the local network is not provided the containers can't communicate with eachother, whilst also running traefik.
+
+```yaml
+version: "3"
+services:
+  owncloud:
+    networks:
+      - redis
+      - mariadb
+      - traefik_net
+
+  mariadb:
+    networks:
+      - mariadb
+
+  redis:
+    networks:
+      - redis
+      
+networks:
+  traefik_net:
+    external: true
+  redis:
+    external: false
+  mariadb:
+    external: false
+```
