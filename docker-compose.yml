@@ -103,7 +103,7 @@ services:
         - '9000:9000'
     volumes:
         - '/var/run/docker.sock:/var/run/docker.sock'
-        - '/var/lib/docker/volumes/portainer_data/_data:/data'
+        - portainer_data:/data
         - '~/.ssh:/root/.ssh'
     labels:
         - 'traefik.enable=true'
@@ -125,3 +125,6 @@ networks:
   db_network:
     external: true
 
+volumes:
+  portainer_data:
+    external: true

@@ -173,3 +173,42 @@ networks:
   mariadb:
     external: false
 ```
+## Further Information
+
+If you try to reference a (named) docker volume or network, that has been created outside of the docker-compose.yml itself, you have to "import" it by specifying it as "external".
+
+For volumes:
+
+```yml
+# volumes:
+#   [name of volume]:
+#     external: true
+
+volumes:
+  portainer_data:
+    external: true
+```
+
+For networks:
+
+```yml
+# networks:
+#   [name of network]:
+#     external: true
+
+networks:
+  traefik_net:
+    external: true
+```
+
+A docker network can be created like this:
+
+```bash
+docker network create (-d bridge) my-network
+```
+
+A docker volume can be created like this:
+
+```bash
+docker volume create my-volume
+```
