@@ -122,10 +122,23 @@ The host entry is **mandatory** in order to use traefik's service.
 
 "Import" a network into a stack. If multiple containers share the same network, they can access all the internal ports of each other. However note that if you try to access a port of another container, it's only accessible under the container name (not localhost). 
 
-Example: smtp-container has a published port 2525->25. A example-container has the published port 8080->80. They both share the network "smtp-network".
+**Example**:
+<br>
+The **smtp-container** has a published port **2525->25**.
+<br>
+An **example-container** has the published port **8080->80**.
+<br>
+They both share the network **"smtp-network"**.
 
-From the example-container: Access port 80 -> ´telnet localhost 80´
-From the example-container: Access port 25 -> ´telnet smtp-container 25´
+```bash
+# Access port 80 from example-container
+$ telnet localhost 80
+```
+
+```bash
+# Access port 25 from example-container
+$ telnet smtp-container 25
+```
 
 The host name is always the exact same as the container name.
 
