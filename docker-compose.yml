@@ -62,14 +62,14 @@ services:
   mysql:
     image: 'mysql:8'
     container_name: "mysql"
-    command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci','--default-authentication-plugin=mysql_native_password']
+    command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci','--mysql-native-password=ON']
     environment:
         - MYSQL_ROOT_PASSWORD=opwer384
     volumes:
-        - ~/db_data:/var/lib/mysql
+        - mysql-data:/var/lib/mysql
     network_mode: db_network
     hostname: mysql
-    restart: always
+    restart: unless-stopped
         
   adminer:
     image: adminer
@@ -127,4 +127,6 @@ networks:
 
 volumes:
   portainer_data:
+    external: true
+  mysql-data:
     external: true
