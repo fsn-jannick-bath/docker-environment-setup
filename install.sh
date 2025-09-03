@@ -161,12 +161,15 @@ else
 fi
 
 MysqlContainerId=$(docker ps -aqf "name=mysql" | head -n 1)
-MysqlIp=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $MysqlContainerId)
-
-mysql --host=$MysqlIp --user=root -popwer384 > /dev/null 2>&1 < /dev/null
-
-if [ $? -eq 0 ]; then
-  echo "Connection successful!"
+if [ -z "$MysqlContainerId" ]; then
+    echo "MySQL Container doesn't exist yet"
 else
-  echo "Connection failed."
+    MysqlIp=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $MysqlContainerId)
+    mysql --host=$MysqlIp --user=root -popwer384 > /dev/null 2>&1 < /dev/null
+
+    if [ $? -eq 0 ]; then
+        echo "Connection successful!"
+    else
+        echo "Connection failed."
+    fi
 fi
